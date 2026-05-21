@@ -19,13 +19,7 @@
       --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      font-size: 14px;
-    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; font-size: 14px; }
     .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 48px; }
     header { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
     header h1 { font-size: 22px; font-weight: 600; }
@@ -35,6 +29,7 @@
       padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
       background: var(--surface2); color: var(--text); cursor: pointer; font-size: 13px;
     }
+    .btn:hover { border-color: var(--accent); }
     .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
     .tab {
@@ -45,44 +40,53 @@
     .filters {
       background: var(--surface2); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 16px; margin-bottom: 20px;
-      display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
     .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-    .field select {
-      min-width: 160px; padding: 8px 10px; border-radius: 6px;
+    .field select, .field input[type="date"] {
+      min-width: 140px; padding: 8px 10px; border-radius: 6px;
       border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      font-family: inherit; font-size: 13px;
     }
-    .filter-actions { margin-left: auto; display: flex; gap: 8px; }
+    .field input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+    .period-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .period-presets span { font-size: 11px; color: var(--muted); align-self: center; margin-right: 4px; }
+    .filter-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+    .period-badge {
+      display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 4px;
+      background: var(--surface); border: 1px solid var(--border); font-size: 12px; color: var(--muted); font-weight: 400;
+    }
     .panel { display: none; }
     .panel.active { display: block; }
     .panel h2 { font-size: 18px; margin-bottom: 16px; }
-    .panel h3 { font-size: 14px; margin: 20px 0 10px; color: var(--muted); font-weight: 600; }
+    .panel h3 { font-size: 14px; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px 16px;
-    }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
     .stat .val { font-size: 20px; font-weight: 600; }
     .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .stat.success .val { color: var(--success); }
-    .period-pills { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .stat.danger .val { color: var(--danger); }
+    .period-pills, .view-pills { display: flex; gap: 6px; flex-wrap: wrap; }
     .pill {
       padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
       background: transparent; color: var(--muted); cursor: pointer; font-size: 12px;
     }
     .pill.active { background: rgba(76,139,245,.15); border-color: var(--accent); color: var(--accent); }
+    .pill.preset.active { background: rgba(61,154,106,.12); border-color: var(--success); color: var(--success); }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
     .card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
     }
-    .chart-placeholder {
-      height: 200px; background: var(--surface2); border-radius: 6px;
-      display: flex; align-items: flex-end; gap: 8px; padding: 16px;
-    }
-    .bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 20px; opacity: .85; }
-    .bar.alt { background: #6b7fa8; }
+    .chart-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .chart-card-head h3 { margin: 0; flex: 1 1 auto; }
+    .chart-wrap { position: relative; height: 220px; background: var(--surface2); border-radius: 6px; padding: 12px 8px 28px; }
+    .chart-wrap svg { width: 100%; height: 100%; display: block; }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 11px; color: var(--muted); }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .caption { font-size: 11px; color: var(--muted); margin-top: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
     th { color: var(--muted); font-weight: 500; font-size: 11px; background: var(--surface2); }
@@ -94,10 +98,14 @@
       display: inline-block; padding: 2px 8px; border-radius: 999px;
       background: rgba(76,139,245,.15); color: var(--accent); font-size: 12px;
     }
-    .caption { font-size: 11px; color: var(--muted); margin-top: 8px; }
     .row-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-    .row-head .period-pills { margin: 0 0 0 auto; }
+    .row-head .period-pills { margin-left: auto; }
+    .trend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .trend-grid { grid-template-columns: 1fr; } }
+    .view-label { font-size: 11px; color: var(--muted); margin-right: 4px; }
     footer { margin-top: 32px; text-align: center; color: var(--muted); font-size: 11px; }
+    .date-error { color: var(--danger); font-size: 11px; margin-top: 6px; display: none; }
+    .date-error.show { display: block; }
   </style>
 </head>
 <body>
@@ -123,56 +131,86 @@
     </nav>
 
     <section class="filters">
-      <div class="field">
-        <label for="category">カテゴリ</label>
-        <select id="category">
-          <option value="beverage">飲料</option>
-          <option value="snack">スナック</option>
-          <option value="daily">日用品</option>
-        </select>
+      <div class="filter-row">
+        <div class="field">
+          <label for="dateStart">POSデータ 開始日</label>
+          <input type="date" id="dateStart" value="2026-04-01" />
+        </div>
+        <div class="field">
+          <label for="dateEnd">POSデータ 終了日</label>
+          <input type="date" id="dateEnd" value="2026-05-20" />
+        </div>
+        <div class="field">
+          <label for="category">カテゴリ</label>
+          <select id="category">
+            <option value="beverage">飲料</option>
+            <option value="snack">スナック</option>
+            <option value="daily">日用品</option>
+          </select>
+        </div>
+        <div class="field" id="skuField" hidden>
+          <label for="sku">対象SKU</label>
+          <select id="sku">
+            <option value="sku-001">SKU-001 炭酸水500ml</option>
+            <option value="sku-042">SKU-042 緑茶350ml</option>
+            <option value="sku-118">SKU-118 ポテトチップス</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn" type="button" id="btnReset">リセット</button>
+          <button class="btn btn-primary" type="button" id="btnApply">分析を実行</button>
+        </div>
       </div>
-      <div class="field" id="skuField" hidden>
-        <label for="sku">対象SKU</label>
-        <select id="sku">
-          <option value="sku-001">SKU-001 炭酸水500ml</option>
-          <option value="sku-042">SKU-042 緑茶350ml</option>
-          <option value="sku-118">SKU-118 ポテトチップス</option>
-        </select>
-      </div>
-      <div class="filter-actions">
-        <button class="btn" type="button">条件を保存</button>
-        <button class="btn btn-primary" type="button">分析を実行</button>
+      <p class="date-error" id="dateError">終了日は開始日以降を指定してください。</p>
+      <div class="period-presets">
+        <span>期間プリセット:</span>
+        <button type="button" class="pill preset" data-preset="7d">直近7日</button>
+        <button type="button" class="pill preset" data-preset="4w">直近4週</button>
+        <button type="button" class="pill preset active" data-preset="custom">今月（4/1〜5/20）</button>
+        <button type="button" class="pill preset" data-preset="lastMonth">前月</button>
+        <button type="button" class="pill preset" data-preset="ytd">今年（1/1〜今日）</button>
       </div>
     </section>
 
     <!-- 1. 売上推移 -->
     <section class="panel active" id="panel-sales" data-panel="sales">
       <div class="row-head">
-        <h2>売上推移 — カテゴリ別SKU</h2>
+        <h2>売上推移 — カテゴリ別SKU<span class="period-badge" id="salesPeriodLabel"></span></h2>
         <div class="period-pills" data-period-group="sales">
           <button class="pill" data-period="daily">日次</button>
           <button class="pill active" data-period="weekly">週次</button>
           <button class="pill" data-period="monthly">月次</button>
         </div>
       </div>
-      <div class="stats">
-        <div class="stat"><div class="val">128,450</div><div class="lbl">購入点数（実数）</div></div>
-        <div class="stat"><div class="val">¥4.82M</div><div class="lbl">購入金額（実数）</div></div>
-        <div class="stat success"><div class="val">+8.2%</div><div class="lbl">購入点数 前年同期比</div></div>
-        <div class="stat success"><div class="val">+5.6%</div><div class="lbl">購入金額 前年同期比</div></div>
-      </div>
-      <div class="card">
-        <h3>購入点数・金額の推移（週次）</h3>
-        <div class="chart-placeholder" aria-hidden="true">
-          <div class="bar" style="height:55%"></div>
-          <div class="bar alt" style="height:62%"></div>
-          <div class="bar" style="height:58%"></div>
-          <div class="bar alt" style="height:68%"></div>
-          <div class="bar" style="height:72%"></div>
+      <div class="stats" id="salesStats"></div>
+
+      <div class="row-head" style="margin-top:8px">
+        <span class="view-label">推移表示:</span>
+        <div class="view-pills" data-view-group="sales-trend">
+          <button class="pill active" data-view="actual">実数推移</button>
+          <button class="pill" data-view="yoy">前年同期比</button>
         </div>
-        <p class="caption">カテゴリ: 飲料 / 週次集計（画面イメージ）</p>
       </div>
-      <h3>カテゴリ内 SKU 一覧</h3>
+
+      <div class="trend-grid">
+        <div class="card">
+          <div class="chart-card-head">
+            <h3 id="qtyChartTitle">購入点数の推移</h3>
+          </div>
+          <div class="chart-wrap" id="qtyChart"></div>
+          <div class="chart-legend" id="qtyLegend"></div>
+        </div>
+        <div class="card">
+          <div class="chart-card-head">
+            <h3 id="amtChartTitle">購入金額の推移</h3>
+          </div>
+          <div class="chart-wrap" id="amtChart"></div>
+          <div class="chart-legend" id="amtLegend"></div>
+        </div>
+      </div>
+      <p class="caption" id="salesChartCaption"></p>
+
+      <h3 style="margin-top:20px">カテゴリ内 SKU 一覧</h3>
       <div class="card" style="padding:0; overflow:hidden">
         <table>
           <thead>
@@ -182,12 +220,7 @@
               <th class="num">前年比（点数）</th><th class="num">前年比（金額）</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td>SKU-001</td><td>炭酸水500ml</td><td class="num">42,100</td><td class="num">¥1.26M</td><td class="num up">+12.4%</td><td class="num up">+9.8%</td></tr>
-            <tr><td>SKU-042</td><td>緑茶350ml</td><td class="num">38,200</td><td class="num">¥1.14M</td><td class="num up">+6.1%</td><td class="num up">+4.2%</td></tr>
-            <tr><td>SKU-118</td><td>麦茶2L</td><td class="num">28,900</td><td class="num">¥867K</td><td class="num down">-2.3%</td><td class="num down">-1.1%</td></tr>
-            <tr><td>SKU-205</td><td>スポーツドリンク</td><td class="num">19,250</td><td class="num">¥578K</td><td class="num up">+15.7%</td><td class="num up">+11.2%</td></tr>
-          </tbody>
+          <tbody id="salesSkuTable"></tbody>
         </table>
       </div>
     </section>
@@ -195,200 +228,495 @@
     <!-- 2. あるSKU分析 -->
     <section class="panel" id="panel-sku" data-panel="sku">
       <div class="row-head">
-        <h2>あるSKU分析 <span class="badge">SKU-001 炭酸水500ml</span></h2>
+        <h2>あるSKU分析 <span class="badge" id="skuBadge">SKU-001</span><span class="period-badge" id="skuPeriodLabel"></span></h2>
         <div class="period-pills" data-period-group="sku">
           <button class="pill" data-period="daily">日次</button>
           <button class="pill active" data-period="weekly">週次</button>
           <button class="pill" data-period="monthly">月次</button>
         </div>
       </div>
-      <div class="stats">
-        <div class="stat"><div class="val">42,100</div><div class="lbl">購入点数（実数）</div></div>
-        <div class="stat"><div class="val">¥1.26M</div><div class="lbl">購入金額（実数）</div></div>
-        <div class="stat success"><div class="val">+12.4%</div><div class="lbl">購入点数 前年同期比</div></div>
-        <div class="stat success"><div class="val">+9.8%</div><div class="lbl">購入金額 前年同期比</div></div>
-      </div>
-      <div class="card">
-        <h3>対象SKUの推移（週次）</h3>
-        <div class="chart-placeholder" aria-hidden="true">
-          <div class="bar" style="height:48%"></div><div class="bar" style="height:58%"></div>
-          <div class="bar" style="height:54%"></div><div class="bar" style="height:65%"></div>
-          <div class="bar" style="height:70%"></div>
+      <div class="stats" id="skuStats"></div>
+
+      <div class="row-head" style="margin-top:8px">
+        <span class="view-label">推移表示:</span>
+        <div class="view-pills" data-view-group="sku-trend">
+          <button class="pill active" data-view="actual">実数推移</button>
+          <button class="pill" data-view="yoy">前年同期比</button>
         </div>
       </div>
+
+      <div class="trend-grid">
+        <div class="card">
+          <h3 id="skuQtyChartTitle">購入点数の推移</h3>
+          <div class="chart-wrap" id="skuQtyChart"></div>
+          <div class="chart-legend" id="skuQtyLegend"></div>
+        </div>
+        <div class="card">
+          <h3 id="skuAmtChartTitle">購入金額の推移</h3>
+          <div class="chart-wrap" id="skuAmtChart"></div>
+          <div class="chart-legend" id="skuAmtLegend"></div>
+        </div>
+      </div>
+      <p class="caption" id="skuChartCaption"></p>
     </section>
 
-    <!-- 3. シェア分析 -->
+    <!-- 3–6 panels (static, period label only) -->
     <section class="panel" id="panel-share" data-panel="share">
-      <h2>シェア分析 — カテゴリ別SKU</h2>
+      <h2>シェア分析<span class="period-badge global-period"></span></h2>
       <div class="grid-2">
         <div>
-          <h3>上位ランキング（購入点数シェア）</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>SKU</th><th>商品名</th><th class="num">シェア</th><th class="num">購入点数</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>SKU-001</td><td>炭酸水500ml</td><td class="num">18.2%</td><td class="num">42,100</td></tr>
-                <tr><td class="num">2</td><td>SKU-042</td><td>緑茶350ml</td><td class="num">16.5%</td><td class="num">38,200</td></tr>
-                <tr><td class="num">3</td><td>SKU-205</td><td>スポーツドリンク</td><td class="num">8.3%</td><td class="num">19,250</td></tr>
-              </tbody>
-            </table>
+          <h3>上位ランキング</h3>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table><thead><tr><th class="num">順位</th><th>SKU</th><th>商品名</th><th class="num">シェア</th></tr></thead>
+            <tbody id="shareTopTable"></tbody></table>
           </div>
         </div>
         <div>
           <h3>シェア上昇ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>SKU</th><th>商品名</th><th class="num">シェア変化</th><th class="num">現在</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>SKU-205</td><td>スポーツドリンク</td><td class="num up">+2.1pt</td><td class="num">8.3%</td></tr>
-                <tr><td class="num">2</td><td>SKU-001</td><td>炭酸水500ml</td><td class="num up">+1.4pt</td><td class="num">18.2%</td></tr>
-                <tr><td class="num">3</td><td>SKU-442</td><td>エナジードリンク</td><td class="num up">+0.9pt</td><td class="num">4.2%</td></tr>
-              </tbody>
-            </table>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table><thead><tr><th class="num">順位</th><th>SKU</th><th class="num">変化</th></tr></thead>
+            <tbody id="shareUpTable"></tbody></table>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 4. 属性分析 -->
     <section class="panel" id="panel-attribute" data-panel="attribute">
-      <h2>属性分析 — カテゴリ別SKU</h2>
+      <h2>属性分析<span class="period-badge global-period"></span></h2>
       <div class="grid-2">
-        <div>
-          <h3>性別ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>属性</th><th class="num">購入点数</th><th class="num">構成比</th><th class="num">前年比</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>女性</td><td class="num">68,200</td><td class="num">53.1%</td><td class="num up">+6.2%</td></tr>
-                <tr><td class="num">2</td><td>男性</td><td class="num">52,100</td><td class="num">40.6%</td><td class="num up">+4.8%</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h3>年代ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>年代</th><th class="num">購入点数</th><th class="num">構成比</th><th class="num">前年比</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>30代</td><td class="num">32,400</td><td class="num">25.2%</td><td class="num up">+9.1%</td></tr>
-                <tr><td class="num">2</td><td>40代</td><td class="num">28,900</td><td class="num">22.5%</td><td class="num up">+7.4%</td></tr>
-                <tr><td class="num">3</td><td>20代</td><td class="num">24,100</td><td class="num">18.8%</td><td class="num up">+11.2%</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div><h3>性別ランキング</h3><div class="card" style="padding:0;overflow:hidden"><table><tbody id="attrGender"></tbody></table></div></div>
+        <div><h3>年代ランキング</h3><div class="card" style="padding:0;overflow:hidden"><table><tbody id="attrAge"></tbody></table></div></div>
       </div>
     </section>
 
-    <!-- 5. 併売分析 -->
     <section class="panel" id="panel-cross" data-panel="cross">
-      <h2>併売分析 <span class="badge">基準: SKU-001 炭酸水500ml</span></h2>
-      <p style="color:var(--muted);margin-bottom:16px">基準SKUと同一レシートで購入されたSKUを分析</p>
+      <h2>併売分析 <span class="badge" id="crossBadge">SKU-001</span><span class="period-badge global-period"></span></h2>
       <div class="grid-2">
-        <div>
-          <h3>購入点数 上位ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>併売SKU</th><th>商品名</th><th class="num">併売点数</th><th class="num">併売率</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>SKU-330</td><td>ミネラル水</td><td class="num">8,420</td><td class="num">19.9%</td></tr>
-                <tr><td class="num">2</td><td>SKU-042</td><td>緑茶350ml</td><td class="num">6,180</td><td class="num">14.7%</td></tr>
-                <tr><td class="num">3</td><td>SKU-205</td><td>スポーツドリンク</td><td class="num">4,920</td><td class="num">11.7%</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h3>シェア上昇ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>併売SKU</th><th>商品名</th><th class="num">変化</th><th class="num">現在</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>SKU-205</td><td>スポーツドリンク</td><td class="num up">+2.4pt</td><td class="num">11.7%</td></tr>
-                <tr><td class="num">2</td><td>SKU-442</td><td>エナジードリンク</td><td class="num up">+1.8pt</td><td class="num">5.2%</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div><h3>購入点数上位</h3><div class="card" style="padding:0;overflow:hidden"><table><tbody id="crossTop"></tbody></table></div></div>
+        <div><h3>シェア上昇</h3><div class="card" style="padding:0;overflow:hidden"><table><tbody id="crossUp"></tbody></table></div></div>
       </div>
     </section>
 
-    <!-- 6. リピーター分析 -->
     <section class="panel" id="panel-repeater" data-panel="repeater">
-      <h2>リピーター分析 <span class="badge">SKU-001 炭酸水500ml</span></h2>
-      <div class="stats">
-        <div class="stat"><div class="val">18,240</div><div class="lbl">リピーター顧客数</div></div>
-        <div class="stat"><div class="val">2.4回</div><div class="lbl">平均購入頻度</div></div>
-        <div class="stat"><div class="val">3.1点</div><div class="lbl">平均購入点数</div></div>
-        <div class="stat"><div class="val">43.3%</div><div class="lbl">リピート率</div></div>
-      </div>
-      <div class="grid-2">
-        <div>
-          <h3>性別ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>性別</th><th class="num">顧客数</th><th class="num">頻度</th><th class="num">点数</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>女性</td><td class="num">10,120</td><td class="num">2.6回</td><td class="num">3.3点</td></tr>
-                <tr><td class="num">2</td><td>男性</td><td class="num">7,410</td><td class="num">2.2回</td><td class="num">2.8点</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h3>年代ランキング</h3>
-          <div class="card" style="padding:0; overflow:hidden">
-            <table>
-              <thead><tr><th class="num">順位</th><th>年代</th><th class="num">顧客数</th><th class="num">頻度</th><th class="num">点数</th></tr></thead>
-              <tbody>
-                <tr><td class="num">1</td><td>30代</td><td class="num">4,820</td><td class="num">2.7回</td><td class="num">3.4点</td></tr>
-                <tr><td class="num">2</td><td>40代</td><td class="num">4,210</td><td class="num">2.5回</td><td class="num">3.2点</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <h3>併売SKUランキング（リピーター購買時）</h3>
-      <div class="card" style="padding:0; overflow:hidden">
-        <table>
-          <thead><tr><th class="num">順位</th><th>併売SKU</th><th>商品名</th><th class="num">併売点数</th><th class="num">併売率</th></tr></thead>
-          <tbody>
-            <tr><td class="num">1</td><td>SKU-330</td><td>ミネラル水</td><td class="num">4,120</td><td class="num">22.6%</td></tr>
-            <tr><td class="num">2</td><td>SKU-042</td><td>緑茶350ml</td><td class="num">2,980</td><td class="num">16.3%</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <h2>リピーター分析 <span class="badge" id="repBadge">SKU-001</span><span class="period-badge global-period"></span></h2>
+      <div class="stats" id="repStats"></div>
     </section>
 
-    <footer>ID-POS Dashboard Mockup · 画面イメージ用サンプルデータ</footer>
+    <footer>ID-POS Dashboard Mockup · 期間・表示切替デモ（サンプルデータ）</footer>
   </div>
 
   <script>
-    const skuTabs = new Set(["sku", "cross", "repeater"]);
-    const tabs = document.querySelectorAll("#mainTabs .tab");
-    const panels = document.querySelectorAll(".panel");
-    const skuField = document.getElementById("skuField");
+    const state = {
+      dateStart: "2026-04-01",
+      dateEnd: "2026-05-20",
+      category: "beverage",
+      sku: "sku-001",
+      granularity: { sales: "weekly", sku: "weekly" },
+      viewMode: { sales: "actual", sku: "actual" },
+      activePreset: "custom",
+    };
 
-    tabs.forEach((btn) => {
+    const SKU_META = {
+      "sku-001": { name: "炭酸水500ml", factor: 1.0 },
+      "sku-042": { name: "緑茶350ml", factor: 0.9 },
+      "sku-118": { name: "ポテトチップス", factor: 0.7 },
+    };
+
+    const CATEGORY_FACTOR = { beverage: 1, snack: 0.82, daily: 0.65 };
+
+    function parseDate(s) { return new Date(s + "T00:00:00"); }
+    function formatDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+    function daysBetween(a, b) {
+      return Math.round((b - a) / 86400000) + 1;
+    }
+    function periodLabel() {
+      return `${state.dateStart.replace(/-/g, "/")} 〜 ${state.dateEnd.replace(/-/g, "/")}`;
+    }
+    function formatNum(n) { return Math.round(n).toLocaleString("ja-JP"); }
+    function formatYen(n) {
+      if (n >= 1000000) return `¥${(n / 1000000).toFixed(2)}M`;
+      if (n >= 1000) return `¥${Math.round(n / 1000)}K`;
+      return `¥${formatNum(n)}`;
+    }
+    function yoyClass(v) { return v >= 0 ? "up" : "down"; }
+    function yoyText(v) { return `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`; }
+
+    function hashSeed(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+      return Math.abs(h);
+    }
+
+    function generateSeries(granularity, viewMode, metric, scopeFactor) {
+      const start = parseDate(state.dateStart);
+      const end = parseDate(state.dateEnd);
+      const totalDays = daysBetween(start, end);
+      let labels = [];
+      let points = 0;
+
+      if (granularity === "daily") {
+        points = Math.min(totalDays, 14);
+        for (let i = 0; i < points; i++) {
+          const d = new Date(start);
+          d.setDate(d.getDate() + Math.floor((i * totalDays) / points));
+          labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
+        }
+      } else if (granularity === "weekly") {
+        points = Math.min(Math.ceil(totalDays / 7), 8);
+        for (let i = 1; i <= points; i++) labels.push(`W${i}`);
+      } else {
+        const months = new Set();
+        for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
+          months.add(`${d.getFullYear()}/${d.getMonth() + 1}`);
+          if (months.size >= 6) break;
+        }
+        labels = [...months];
+        if (labels.length < 2) labels = ["前期", "当期"];
+        points = labels.length;
+      }
+
+      const seed = hashSeed(state.dateStart + state.dateEnd + state.category + metric + granularity);
+      const base = metric === "qty"
+        ? 1800 * scopeFactor * (totalDays / 30)
+        : 540000 * scopeFactor * (totalDays / 30);
+
+      const actual = [];
+      const yoyPct = [];
+      for (let i = 0; i < points; i++) {
+        const wave = 0.85 + 0.15 * Math.sin((seed + i) * 0.7);
+        const trend = 1 + (i / points) * 0.12;
+        actual.push(base * wave * trend / points * (granularity === "daily" ? 1 : granularity === "weekly" ? 4 : 12));
+        yoyPct.push(2 + ((seed + i * 3) % 18) - 4 + (metric === "amt" ? -1 : 0));
+      }
+
+      return { labels, actual, yoyPct, points };
+    }
+
+    function renderLineChart(containerId, labels, values, options) {
+      const { viewMode, unit, isPercent } = options;
+      const el = document.getElementById(containerId);
+      const w = 400, h = 160, padL = 44, padR = 12, padT = 12, padB = 28;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+
+      const displayValues = viewMode === "yoy" && isPercent
+        ? values
+        : values;
+      const min = viewMode === "yoy"
+        ? Math.min(...displayValues, -5)
+        : Math.min(...displayValues) * 0.9;
+      const max = viewMode === "yoy"
+        ? Math.max(...displayValues, 5)
+        : Math.max(...displayValues) * 1.05;
+      const range = max - min || 1;
+
+      const pts = displayValues.map((v, i) => {
+        const x = padL + (i / Math.max(displayValues.length - 1, 1)) * chartW;
+        const y = padT + chartH - ((v - min) / range) * chartH;
+        return `${x},${y}`;
+      }).join(" ");
+
+      const zeroY = viewMode === "yoy"
+        ? padT + chartH - ((0 - min) / range) * chartH
+        : null;
+
+      const color = viewMode === "yoy" ? "var(--success)" : "var(--accent)";
+      const fillOpacity = viewMode === "actual" ? 0.12 : 0;
+
+      let areaPath = "";
+      if (viewMode === "actual" && displayValues.length) {
+        const firstX = padL;
+        const lastX = padL + chartW;
+        areaPath = `<path d="M${firstX},${padT + chartH} L${pts.split(" ").join(" L")} L${lastX},${padT + chartH} Z" fill="${color}" opacity="${fillOpacity}"/>`;
+      }
+
+      const gridLines = viewMode === "yoy" ? 5 : 4;
+      let grids = "";
+      for (let g = 0; g <= gridLines; g++) {
+        const gy = padT + (g / gridLines) * chartH;
+        grids += `<line x1="${padL}" y1="${gy}" x2="${padL + chartW}" y2="${gy}" stroke="var(--border)" stroke-width="1"/>`;
+      }
+
+      const zeroLine = zeroY != null
+        ? `<line x1="${padL}" y1="${zeroY}" x2="${padL + chartW}" y2="${zeroY}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4"/>` 
+        : "";
+
+      const labelEls = labels.map((lb, i) => {
+        const x = padL + (i / Math.max(labels.length - 1, 1)) * chartW;
+        return `<text x="${x}" y="${h - 6}" fill="var(--muted)" font-size="9" text-anchor="middle">${lb}</text>`;
+      }).join("");
+
+      const yLabel = viewMode === "yoy" ? "%" : unit;
+      const midVal = min + range / 2;
+      const yTicks = viewMode === "yoy"
+        ? `<text x="4" y="${padT + 4}" fill="var(--muted)" font-size="9">${max.toFixed(0)}%</text>
+           <text x="4" y="${padT + chartH / 2}" fill="var(--muted)" font-size="9">${midVal.toFixed(0)}%</text>
+           <text x="4" y="${padT + chartH}" fill="var(--muted)" font-size="9">${min.toFixed(0)}%</text>`
+        : `<text x="4" y="${padT + 4}" fill="var(--muted)" font-size="9">${formatTick(max, unit)}</text>
+           <text x="4" y="${padT + chartH}" fill="var(--muted)" font-size="9">0</text>`;
+
+      el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${grids}${zeroLine}${areaPath}
+        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+        ${labelEls}${yTicks}</svg>`;
+    }
+
+    function formatTick(v, unit) {
+      if (unit === "円") return v >= 10000 ? `${Math.round(v / 1000)}千` : String(Math.round(v));
+      return formatNum(v);
+    }
+
+    function getScopeFactor() {
+      const days = daysBetween(parseDate(state.dateStart), parseDate(state.dateEnd));
+      const cat = CATEGORY_FACTOR[state.category] || 1;
+      const sku = SKU_META[state.sku]?.factor || 1;
+      return cat * (days / 50);
+    }
+
+    function getSkuScopeFactor() {
+      const days = daysBetween(parseDate(state.dateStart), parseDate(state.dateEnd));
+      return (SKU_META[state.sku]?.factor || 1) * CATEGORY_FACTOR[state.category] * (days / 50);
+    }
+
+    function updatePeriodLabels() {
+      const label = periodLabel();
+      document.getElementById("salesPeriodLabel").textContent = label;
+      document.getElementById("skuPeriodLabel").textContent = label;
+      document.querySelectorAll(".global-period").forEach((el) => { el.textContent = label; });
+    }
+
+    function renderSalesPanel() {
+      const gran = state.granularity.sales;
+      const view = state.viewMode.sales;
+      const scope = getScopeFactor();
+      const granLabel = { daily: "日次", weekly: "週次", monthly: "月次" }[gran];
+      const viewLabel = view === "actual" ? "実数推移" : "前年同期比";
+
+      const qtySeries = generateSeries(gran, view, "qty", scope);
+      const amtSeries = generateSeries(gran, view, "amt", scope);
+
+      const totalQty = qtySeries.actual.reduce((a, b) => a + b, 0);
+      const totalAmt = amtSeries.actual.reduce((a, b) => a + b, 0);
+      const avgQtyYoy = qtySeries.yoyPct.reduce((a, b) => a + b, 0) / qtySeries.yoyPct.length;
+      const avgAmtYoy = amtSeries.yoyPct.reduce((a, b) => a + b, 0) / amtSeries.yoyPct.length;
+
+      document.getElementById("salesStats").innerHTML = `
+        <div class="stat"><div class="val">${formatNum(totalQty)}</div><div class="lbl">購入点数（実数・期間合計）</div></div>
+        <div class="stat"><div class="val">${formatYen(totalAmt)}</div><div class="lbl">購入金額（実数・期間合計）</div></div>
+        <div class="stat ${avgQtyYoy >= 0 ? "success" : "danger"}"><div class="val">${yoyText(avgQtyYoy)}</div><div class="lbl">購入点数 前年同期比（平均）</div></div>
+        <div class="stat ${avgAmtYoy >= 0 ? "success" : "danger"}"><div class="val">${yoyText(avgAmtYoy)}</div><div class="lbl">購入金額 前年同期比（平均）</div></div>`;
+
+      document.getElementById("qtyChartTitle").textContent =
+        view === "actual" ? `購入点数の推移（${granLabel}・実数）` : `購入点数の推移（${granLabel}・前年同期比）`;
+      document.getElementById("amtChartTitle").textContent =
+        view === "actual" ? `購入金額の推移（${granLabel}・実数）` : `購入金額の推移（${granLabel}・前年同期比）`;
+
+      renderLineChart("qtyChart", qtySeries.labels,
+        view === "actual" ? qtySeries.actual : qtySeries.yoyPct,
+        { viewMode: view, unit: "点", isPercent: view === "yoy" });
+      renderLineChart("amtChart", amtSeries.labels,
+        view === "actual" ? amtSeries.actual : amtSeries.yoyPct,
+        { viewMode: view, unit: "円", isPercent: view === "yoy" });
+
+      const legendColor = view === "yoy" ? "var(--success)" : "var(--accent)";
+      const legendText = view === "yoy" ? "前年同期比（%）" : (granLabel + "実数");
+      document.getElementById("qtyLegend").innerHTML =
+        `<span class="legend-item"><span class="legend-dot" style="background:${legendColor}"></span>${legendText}（購入点数）</span>`;
+      document.getElementById("amtLegend").innerHTML =
+        `<span class="legend-item"><span class="legend-dot" style="background:${legendColor}"></span>${legendText}（購入金額）</span>`;
+
+      document.getElementById("salesChartCaption").textContent =
+        `表示: ${viewLabel} / 集計: ${granLabel} / 期間: ${periodLabel()} / カテゴリ: ${document.getElementById("category").selectedOptions[0].text}`;
+
+      const skus = [
+        { id: "SKU-001", name: "炭酸水500ml", f: 1 },
+        { id: "SKU-042", name: "緑茶350ml", f: 0.9 },
+        { id: "SKU-118", name: "麦茶2L", f: 0.65 },
+        { id: "SKU-205", name: "スポーツドリンク", f: 0.48 },
+      ];
+      document.getElementById("salesSkuTable").innerHTML = skus.map((s) => {
+        const q = totalQty * s.f * 0.35;
+        const a = totalAmt * s.f * 0.35;
+        const qy = avgQtyYoy + (s.f - 0.8) * 5;
+        const ay = avgAmtYoy + (s.f - 0.8) * 4;
+        return `<tr><td>${s.id}</td><td>${s.name}</td><td class="num">${formatNum(q)}</td><td class="num">${formatYen(a)}</td>
+          <td class="num ${yoyClass(qy)}">${yoyText(qy)}</td><td class="num ${yoyClass(ay)}">${yoyText(ay)}</td></tr>`;
+      }).join("");
+    }
+
+    function renderSkuPanel() {
+      const gran = state.granularity.sku;
+      const view = state.viewMode.sku;
+      const scope = getSkuScopeFactor();
+      const meta = SKU_META[state.sku];
+      const granLabel = { daily: "日次", weekly: "週次", monthly: "月次" }[gran];
+      const viewLabel = view === "actual" ? "実数推移" : "前年同期比";
+
+      document.getElementById("skuBadge").textContent = `${state.sku.toUpperCase()} ${meta.name}`;
+
+      const qtySeries = generateSeries(gran, view, "qty", scope);
+      const amtSeries = generateSeries(gran, view, "amt", scope);
+      const totalQty = qtySeries.actual.reduce((a, b) => a + b, 0);
+      const totalAmt = amtSeries.actual.reduce((a, b) => a + b, 0);
+      const avgQtyYoy = qtySeries.yoyPct.reduce((a, b) => a + b, 0) / qtySeries.yoyPct.length;
+      const avgAmtYoy = amtSeries.yoyPct.reduce((a, b) => a + b, 0) / amtSeries.yoyPct.length;
+
+      document.getElementById("skuStats").innerHTML = `
+        <div class="stat"><div class="val">${formatNum(totalQty)}</div><div class="lbl">購入点数（実数）</div></div>
+        <div class="stat"><div class="val">${formatYen(totalAmt)}</div><div class="lbl">購入金額（実数）</div></div>
+        <div class="stat ${avgQtyYoy >= 0 ? "success" : "danger"}"><div class="val">${yoyText(avgQtyYoy)}</div><div class="lbl">点数 前年同期比</div></div>
+        <div class="stat ${avgAmtYoy >= 0 ? "success" : "danger"}"><div class="val">${yoyText(avgAmtYoy)}</div><div class="lbl">金額 前年同期比</div></div>`;
+
+      document.getElementById("skuQtyChartTitle").textContent =
+        view === "actual" ? `購入点数（${granLabel}・実数）` : `購入点数（${granLabel}・前年同期比）`;
+      document.getElementById("skuAmtChartTitle").textContent =
+        view === "actual" ? `購入金額（${granLabel}・実数）` : `購入金額（${granLabel}・前年同期比）`;
+
+      renderLineChart("skuQtyChart", qtySeries.labels,
+        view === "actual" ? qtySeries.actual : qtySeries.yoyPct,
+        { viewMode: view, unit: "点", isPercent: view === "yoy" });
+      renderLineChart("skuAmtChart", amtSeries.labels,
+        view === "actual" ? amtSeries.actual : amtSeries.yoyPct,
+        { viewMode: view, unit: "円", isPercent: view === "yoy" });
+
+      document.getElementById("skuChartCaption").textContent =
+        `対象SKU: ${meta.name} / 表示: ${viewLabel} / ${granLabel} / 期間: ${periodLabel()}`;
+    }
+
+    function renderOtherPanels() {
+      const f = getScopeFactor();
+      document.getElementById("shareTopTable").innerHTML = `
+        <tr><td class="num">1</td><td>SKU-001</td><td>炭酸水500ml</td><td class="num">${(18 * f).toFixed(1)}%</td></tr>
+        <tr><td class="num">2</td><td>SKU-042</td><td>緑茶350ml</td><td class="num">${(16 * f).toFixed(1)}%</td></tr>`;
+      document.getElementById("shareUpTable").innerHTML = `
+        <tr><td class="num">1</td><td>SKU-205</td><td class="num up">+2.1pt</td></tr>`;
+      document.getElementById("attrGender").innerHTML = `
+        <tr><td class="num">1</td><td>女性</td><td class="num">${formatNum(68200 * f)}</td></tr>`;
+      document.getElementById("attrAge").innerHTML = `
+        <tr><td class="num">1</td><td>30代</td><td class="num">${formatNum(32400 * f)}</td></tr>`;
+      document.getElementById("crossTop").innerHTML = `<tr><td class="num">1</td><td>SKU-330</td><td class="num">${formatNum(8420 * f)}</td></tr>`;
+      document.getElementById("crossUp").innerHTML = `<tr><td class="num">1</td><td>SKU-205</td><td class="num up">+2.4pt</td></tr>`;
+      document.getElementById("crossBadge").textContent = state.sku.toUpperCase();
+      document.getElementById("repBadge").textContent = state.sku.toUpperCase();
+      document.getElementById("repStats").innerHTML = `
+        <div class="stat"><div class="val">${formatNum(18240 * f)}</div><div class="lbl">リピーター数</div></div>
+        <div class="stat"><div class="val">2.4回</div><div class="lbl">平均購入頻度</div></div>`;
+    }
+
+    function validateDates() {
+      const start = parseDate(state.dateStart);
+      const end = parseDate(state.dateEnd);
+      const err = document.getElementById("dateError");
+      if (end < start) {
+        err.classList.add("show");
+        return false;
+      }
+      err.classList.remove("show");
+      return true;
+    }
+
+    function applyAnalysis() {
+      state.dateStart = document.getElementById("dateStart").value;
+      state.dateEnd = document.getElementById("dateEnd").value;
+      state.category = document.getElementById("category").value;
+      state.sku = document.getElementById("sku").value;
+      if (!validateDates()) return;
+      updatePeriodLabels();
+      renderSalesPanel();
+      renderSkuPanel();
+      renderOtherPanels();
+    }
+
+    function setPreset(preset) {
+      const today = new Date();
+      const end = formatDate(today);
+      let start;
+      if (preset === "7d") {
+        const d = new Date(today); d.setDate(d.getDate() - 6);
+        start = formatDate(d);
+      } else if (preset === "4w") {
+        const d = new Date(today); d.setDate(d.getDate() - 27);
+        start = formatDate(d);
+      } else if (preset === "custom") {
+        start = "2026-04-01"; document.getElementById("dateEnd").value = "2026-05-20";
+        document.getElementById("dateStart").value = start;
+        state.activePreset = preset;
+        document.querySelectorAll(".pill.preset").forEach((p) =>
+          p.classList.toggle("active", p.dataset.preset === preset));
+        applyAnalysis();
+        return;
+      } else if (preset === "lastMonth") {
+        const d = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        start = formatDate(d);
+        const last = new Date(today.getFullYear(), today.getMonth(), 0);
+        document.getElementById("dateEnd").value = formatDate(last);
+      } else if (preset === "ytd") {
+        start = `${today.getFullYear()}-01-01`;
+      }
+      document.getElementById("dateStart").value = start;
+      if (preset !== "lastMonth") document.getElementById("dateEnd").value = end;
+      state.activePreset = preset;
+      document.querySelectorAll(".pill.preset").forEach((p) =>
+        p.classList.toggle("active", p.dataset.preset === preset));
+      applyAnalysis();
+    }
+
+    const skuTabs = new Set(["sku", "cross", "repeater"]);
+    document.querySelectorAll("#mainTabs .tab").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.dataset.tab;
-        tabs.forEach((t) => t.classList.toggle("active", t === btn));
-        panels.forEach((p) => p.classList.toggle("active", p.dataset.panel === id));
-        skuField.hidden = !skuTabs.has(id);
+        document.querySelectorAll("#mainTabs .tab").forEach((t) => t.classList.toggle("active", t === btn));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === id));
+        document.getElementById("skuField").hidden = !skuTabs.has(id);
       });
     });
 
     document.querySelectorAll("[data-period-group]").forEach((group) => {
+      const panel = group.dataset.periodGroup;
       group.querySelectorAll(".pill").forEach((pill) => {
         pill.addEventListener("click", () => {
           group.querySelectorAll(".pill").forEach((p) => p.classList.remove("active"));
           pill.classList.add("active");
+          state.granularity[panel] = pill.dataset.period;
+          applyAnalysis();
         });
       });
     });
+
+    document.querySelectorAll("[data-view-group]").forEach((group) => {
+      const panel = group.dataset.viewGroup.replace("-trend", "");
+      group.querySelectorAll(".pill").forEach((pill) => {
+        pill.addEventListener("click", () => {
+          group.querySelectorAll(".pill").forEach((p) => p.classList.remove("active"));
+          pill.classList.add("active");
+          state.viewMode[panel] = pill.dataset.view;
+          applyAnalysis();
+        });
+      });
+    });
+
+    document.querySelectorAll(".pill.preset").forEach((btn) => {
+      btn.addEventListener("click", () => setPreset(btn.dataset.preset));
+    });
+
+    document.getElementById("btnApply").addEventListener("click", applyAnalysis);
+    document.getElementById("btnReset").addEventListener("click", () => setPreset("custom"));
+    document.getElementById("dateStart").addEventListener("change", () => {
+      state.activePreset = "";
+      document.querySelectorAll(".pill.preset").forEach((p) => p.classList.remove("active"));
+    });
+    document.getElementById("dateEnd").addEventListener("change", () => {
+      state.activePreset = "";
+      document.querySelectorAll(".pill.preset").forEach((p) => p.classList.remove("active"));
+    });
+    document.getElementById("category").addEventListener("change", applyAnalysis);
+    document.getElementById("sku").addEventListener("change", applyAnalysis);
+
+    applyAnalysis();
   </script>
 </body>
 </html>
