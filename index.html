@@ -122,8 +122,7 @@
     </header>
 
     <nav class="tabs" id="mainTabs" aria-label="分析メニュー">
-      <button class="tab active" data-tab="sales">売上推移</button>
-      <button class="tab" data-tab="sku">あるSKU分析</button>
+      <button class="tab active" data-tab="sales">売上分析</button>
       <button class="tab" data-tab="share">シェア分析</button>
       <button class="tab" data-tab="attribute">属性分析</button>
       <button class="tab" data-tab="cross">併売分析</button>
@@ -172,10 +171,10 @@
       </div>
     </section>
 
-    <!-- 1. 売上推移 -->
+    <!-- 1. 売上分析 -->
     <section class="panel active" id="panel-sales" data-panel="sales">
       <div class="row-head">
-        <h2>売上推移 — カテゴリ別SKU<span class="period-badge" id="salesPeriodLabel"></span></h2>
+        <h2>売上分析 — カテゴリ別SKU<span class="period-badge" id="salesPeriodLabel"></span></h2>
         <div class="period-pills" data-period-group="sales">
           <button class="pill" data-period="daily">日次</button>
           <button class="pill active" data-period="weekly">週次</button>
@@ -225,42 +224,7 @@
       </div>
     </section>
 
-    <!-- 2. あるSKU分析 -->
-    <section class="panel" id="panel-sku" data-panel="sku">
-      <div class="row-head">
-        <h2>あるSKU分析 <span class="badge" id="skuBadge">SKU-001</span><span class="period-badge" id="skuPeriodLabel"></span></h2>
-        <div class="period-pills" data-period-group="sku">
-          <button class="pill" data-period="daily">日次</button>
-          <button class="pill active" data-period="weekly">週次</button>
-          <button class="pill" data-period="monthly">月次</button>
-        </div>
-      </div>
-      <div class="stats" id="skuStats"></div>
-
-      <div class="row-head" style="margin-top:8px">
-        <span class="view-label">推移表示:</span>
-        <div class="view-pills" data-view-group="sku-trend">
-          <button class="pill active" data-view="actual">実数推移</button>
-          <button class="pill" data-view="yoy">前年同期比</button>
-        </div>
-      </div>
-
-      <div class="trend-grid">
-        <div class="card">
-          <h3 id="skuQtyChartTitle">購入点数の推移</h3>
-          <div class="chart-wrap" id="skuQtyChart"></div>
-          <div class="chart-legend" id="skuQtyLegend"></div>
-        </div>
-        <div class="card">
-          <h3 id="skuAmtChartTitle">購入金額の推移</h3>
-          <div class="chart-wrap" id="skuAmtChart"></div>
-          <div class="chart-legend" id="skuAmtLegend"></div>
-        </div>
-      </div>
-      <p class="caption" id="skuChartCaption"></p>
-    </section>
-
-    <!-- 3–6 panels (static, period label only) -->
+    <!-- 2–5 panels -->
     <section class="panel" id="panel-share" data-panel="share">
       <h2>シェア分析<span class="period-badge global-period"></span></h2>
       <div class="grid-2">
@@ -311,15 +275,9 @@
       dateEnd: "2026-05-20",
       category: "beverage",
       sku: "sku-001",
-      granularity: { sales: "weekly", sku: "weekly" },
-      viewMode: { sales: "actual", sku: "actual" },
+      granularity: { sales: "weekly" },
+      viewMode: { sales: "actual" },
       activePreset: "custom",
-    };
-
-    const SKU_META = {
-      "sku-001": { name: "炭酸水500ml", factor: 1.0 },
-      "sku-042": { name: "緑茶350ml", factor: 0.9 },
-      "sku-118": { name: "ポテトチップス", factor: 0.7 },
     };
 
     const CATEGORY_FACTOR = { beverage: 1, snack: 0.82, daily: 0.65 };
@@ -473,19 +431,12 @@
     function getScopeFactor() {
       const days = daysBetween(parseDate(state.dateStart), parseDate(state.dateEnd));
       const cat = CATEGORY_FACTOR[state.category] || 1;
-      const sku = SKU_META[state.sku]?.factor || 1;
       return cat * (days / 50);
-    }
-
-    function getSkuScopeFactor() {
-      const days = daysBetween(parseDate(state.dateStart), parseDate(state.dateEnd));
-      return (SKU_META[state.sku]?.factor || 1) * CATEGORY_FACTOR[state.category] * (days / 50);
     }
 
     function updatePeriodLabels() {
       const label = periodLabel();
       document.getElementById("salesPeriodLabel").textContent = label;
-      document.getElementById("skuPeriodLabel").textContent = label;
       document.querySelectorAll(".global-period").forEach((el) => { el.textContent = label; });
     }
 
@@ -548,45 +499,6 @@
       }).join("");
     }
 
-    function renderSkuPanel() {
-      const gran = state.granularity.sku;
-      const view = state.viewMode.sku;
-      const scope = getSkuScopeFactor();
-      const meta = SKU_META[state.sku];
-      const granLabel = { daily: "日次", weekly: "週次", monthly: "月次" }[gran];
-      const viewLabel = view === "actual" ? "実数推移" : "前年同期比";
-
-      document.getElementById("skuBadge").textContent = `${state.sku.toUpperCase()} ${meta.name}`;
-
-      const qtySeries = generateSeries(gran, view, "qty", scope);
-      const amtSeries = generateSeries(gran, view, "amt", scope);
-      const totalQty = qtySeries.actual.reduce((a, b) => a + b, 0);
-      const totalAmt = amtSeries.actual.reduce((a, b) => a + b, 0);
-      const avgQtyYoy = qtySeries.yoyPct.reduce((a, b) => a + b, 0) / qtySeries.yoyPct.length;
-      const avgAmtYoy = amtSeries.yoyPct.reduce((a, b) => a + b, 0) / amtSeries.yoyPct.length;
-
-      document.getElementById("skuStats").innerHTML = `
-        <div class="stat"><div class="val">${formatNum(totalQty)}</div><div class="lbl">購入点数（実数）</div></div>
-        <div class="stat"><div class="val">${formatYen(totalAmt)}</div><div class="lbl">購入金額（実数）</div></div>
-        <div class="stat ${avgQtyYoy >= 0 ? "success" : "danger"}"><div class="val">${yoyText(avgQtyYoy)}</div><div class="lbl">点数 前年同期比</div></div>
-        <div class="stat ${avgAmtYoy >= 0 ? "success" : "danger"}"><div class="val">${yoyText(avgAmtYoy)}</div><div class="lbl">金額 前年同期比</div></div>`;
-
-      document.getElementById("skuQtyChartTitle").textContent =
-        view === "actual" ? `購入点数（${granLabel}・実数）` : `購入点数（${granLabel}・前年同期比）`;
-      document.getElementById("skuAmtChartTitle").textContent =
-        view === "actual" ? `購入金額（${granLabel}・実数）` : `購入金額（${granLabel}・前年同期比）`;
-
-      renderLineChart("skuQtyChart", qtySeries.labels,
-        view === "actual" ? qtySeries.actual : qtySeries.yoyPct,
-        { viewMode: view, unit: "点", isPercent: view === "yoy" });
-      renderLineChart("skuAmtChart", amtSeries.labels,
-        view === "actual" ? amtSeries.actual : amtSeries.yoyPct,
-        { viewMode: view, unit: "円", isPercent: view === "yoy" });
-
-      document.getElementById("skuChartCaption").textContent =
-        `対象SKU: ${meta.name} / 表示: ${viewLabel} / ${granLabel} / 期間: ${periodLabel()}`;
-    }
-
     function renderOtherPanels() {
       const f = getScopeFactor();
       document.getElementById("shareTopTable").innerHTML = `
@@ -627,7 +539,6 @@
       if (!validateDates()) return;
       updatePeriodLabels();
       renderSalesPanel();
-      renderSkuPanel();
       renderOtherPanels();
     }
 
@@ -665,7 +576,7 @@
       applyAnalysis();
     }
 
-    const skuTabs = new Set(["sku", "cross", "repeater"]);
+    const skuTabs = new Set(["cross", "repeater"]);
     document.querySelectorAll("#mainTabs .tab").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.dataset.tab;
