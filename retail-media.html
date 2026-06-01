@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>リテールメディア分析ダッシュボード</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #181b24;
+      --surface2: #1f2430;
+      --border: #2a3142;
+      --text: #e8eaef;
+      --muted: #9aa3b5;
+      --accent: #4c8bf5;
+      --success: #3d9a6a;
+      --danger: #c45c5c;
+      --warning: #c49a3d;
+      --radius: 8px;
+      --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; font-size: 14px; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 20px 48px; }
+    header { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+    header h1 { font-size: 22px; font-weight: 600; }
+    header p { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .header-actions { margin-left: auto; display: flex; gap: 8px; }
+    .btn {
+      padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text); cursor: pointer; font-size: 13px;
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .tab {
+      padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); cursor: pointer; font-size: 13px;
+    }
+    .tab.active { background: rgba(76,139,245,.15); border-color: var(--accent); color: var(--accent); }
+    .filters {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 20px;
+    }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+    .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .field select {
+      min-width: 160px; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      font-family: inherit; font-size: 13px;
+    }
+    .filter-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .period-note { font-size: 11px; color: var(--muted); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel h2 { font-size: 18px; margin-bottom: 8px; }
+    .panel h3 { font-size: 14px; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
+    .desc { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .stat .val { font-size: 20px; font-weight: 600; }
+    .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .stat.success .val { color: var(--success); }
+    .stat.info .val { color: var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+    }
+    .card-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .chart-wrap { position: relative; height: 220px; background: var(--surface2); border-radius: 6px; padding: 12px 8px 28px; }
+    .chart-wrap.sm { height: 160px; }
+    .chart-wrap svg { width: 100%; height: 100%; display: block; }
+    .caption { font-size: 11px; color: var(--muted); margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; font-size: 11px; background: var(--surface2); }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    td.num, th.num { text-align: right; }
+    .up { color: var(--success); }
+    .down { color: var(--danger); }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      background: rgba(76,139,245,.15); color: var(--accent); font-size: 12px;
+    }
+    .info-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-top: 16px;
+    }
+    .info-box-inner { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+    .info-box-text { flex: 1 1 240px; }
+    .info-box-text strong { display: block; margin-bottom: 6px; font-size: 13px; }
+    .info-box-text p { font-size: 12px; color: var(--muted); }
+    .info-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex: 1 1 320px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    .row-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .kpi-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+    .kpi-row.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 12px; font-weight: 600; }
+    .pie-wrap { display: flex; justify-content: center; padding: 8px 0; }
+    footer { margin-top: 32px; text-align: center; color: var(--muted); font-size: 11px; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    tr.warn td { background: rgba(196,154,61,.08); }
+    tr.success td { background: rgba(61,154,106,.06); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>リテールメディア分析</h1>
+        <p>リテールメディア配信 × リテーラー提供AIカメラ × ID-POS 統合ダッシュボード</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" type="button">エクスポート</button>
+        <button class="btn btn-primary" type="button">レポート出力</button>
+      </div>
+    </header>
+
+    <nav class="tabs" id="mainTabs" aria-label="分析メニュー">
+      <button class="tab active" data-tab="overview">概要</button>
+      <button class="tab" data-tab="campaign">キャンペーン</button>
+      <button class="tab" data-tab="camera">AIカメラ</button>
+      <button class="tab" data-tab="journey">インストア導線</button>
+      <button class="tab" data-tab="attribution">効果検証</button>
+      <button class="tab" data-tab="store">店舗別</button>
+    </nav>
+
+    <section class="filters">
+      <div class="filter-row">
+        <div class="field">
+          <label for="campaign">キャンペーン</label>
+          <select id="campaign">
+            <option value="spring">2026春 新商品ローンチ</option>
+            <option value="endcap">Q2 エンドキャップ集中</option>
+            <option value="signage">デジタルサイネージ 飲料</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="store">店舗エリア</label>
+          <select id="store">
+            <option value="all">全店舗（248店）</option>
+            <option value="kanto">関東エリア（82店）</option>
+            <option value="kansai">関西エリア（64店）</option>
+            <option value="chubu">中部エリア（51店）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="zone">カメラゾーン</label>
+          <select id="zone">
+            <option value="all">全ゾーン</option>
+            <option value="entrance">入口付近</option>
+            <option value="beverage">飲料売場</option>
+            <option value="endcap">エンドキャップ</option>
+            <option value="checkout">レジ前</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <span class="period-note" id="periodNote">期間: 2026/04/01 — 2026/05/20</span>
+          <button class="btn btn-primary" type="button" id="btnApply">分析を実行</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 概要 -->
+    <section class="panel active" id="panel-overview" data-panel="overview">
+      <h2>リテールメディア × AIカメラ — 統合概要</h2>
+      <p class="desc">リテーラー提供のAIカメラ（来店者計測・視線・棚前滞在）とリテールメディア配信ログ、ID-POSを突合した分析</p>
+      <div class="stats" id="overviewStats"></div>
+      <div class="grid-2">
+        <div>
+          <h3>週次トレンド — メディア接触と購買転換</h3>
+          <div class="chart-wrap" id="overviewTrend"></div>
+          <p class="caption">横軸: 週 / 縦軸: 件数（千） / ソース: RM配信ログ + AIカメラ + ID-POS / 2026/04/01—05/20</p>
+        </div>
+        <div class="card">
+          <div class="card-title">メディア接触チャネル構成</div>
+          <div class="pie-wrap" id="channelPie"></div>
+          <p class="caption">インプレッション構成比（%）</p>
+        </div>
+      </div>
+      <hr class="divider" />
+      <h3>データソース統合ステータス</h3>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>データソース</th><th>提供元</th><th>更新頻度</th><th class="num">カバレッジ</th><th class="num">直近同期</th></tr></thead>
+          <tbody id="sourceTable"></tbody>
+        </table>
+      </div>
+      <div class="info-box" id="cameraScope"></div>
+    </section>
+
+    <!-- キャンペーン -->
+    <section class="panel" id="panel-campaign" data-panel="campaign">
+      <h2>キャンペーン — リテールメディア配信分析</h2>
+      <div class="stats" id="campaignStats"></div>
+      <div class="grid-2">
+        <div>
+          <h3>メディアタイプ別 — インプレッションと視認率</h3>
+          <div class="chart-wrap" id="mediaTypeChart"></div>
+          <p class="caption">視認率はAIカメラ視線検知ベース（推定）</p>
+        </div>
+        <div>
+          <h3>クリエイティブ別 — 視認率と棚接近率</h3>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead><tr><th>CR</th><th>タイプ</th><th class="num">imp（千）</th><th class="num">視認率</th><th class="num">棚接近率</th><th class="num">前週比</th></tr></thead>
+              <tbody id="creativeTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <h3>配信スケジュール × パフォーマンス（日次）</h3>
+      <div class="chart-wrap" id="dailyChart"></div>
+      <p class="caption">横軸: 日付 / 縦軸: 件数（千/日） / ソース: RM配信ログ + AIカメラ視線データ</p>
+    </section>
+
+    <!-- AIカメラ -->
+    <section class="panel" id="panel-camera" data-panel="camera">
+      <div class="row-head">
+        <h2>AIカメラ分析</h2>
+        <span class="badge">リテーラー提供データ</span>
+      </div>
+      <p class="desc">店舗内カメラによる匿名来店者計測。ゾーン別の通過数・視線率・滞在時間・ピックアップ推定を集計。</p>
+      <div class="stats" id="cameraStats"></div>
+      <div class="grid-2">
+        <div>
+          <h3>ゾーン別 — 通過数と視認率</h3>
+          <div class="chart-wrap" id="zoneChart"></div>
+        </div>
+        <div>
+          <h3>時間帯別 — 来店者フローと視認率</h3>
+          <div class="chart-wrap" id="hourChart"></div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <h3>カメラゾーン × メディア設置 — 詳細指標</h3>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>ゾーン</th><th class="num">カメラ数</th><th class="num">通過数</th><th class="num">視認率</th><th class="num">平均滞在</th><th class="num">ピックアップ率</th><th class="num">前週比</th></tr></thead>
+          <tbody id="zoneDetailTable"></tbody>
+        </table>
+      </div>
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <h3>推定属性構成（匿名・ゾーン集計）</h3>
+          <p class="caption" style="margin-bottom:12px">AI推定。個人特定不可。5歳刻み年代×性別の構成比のみ提供。</p>
+          <div class="grid-2">
+            <div class="card"><div class="card-title">性別構成</div><div class="pie-wrap" id="genderPie"></div></div>
+            <div class="card"><div class="card-title">年代構成</div><div class="chart-wrap sm" id="ageChart"></div></div>
+          </div>
+        </div>
+        <div>
+          <h3>曜日別 — 視認率と滞在時間</h3>
+          <div class="chart-wrap" id="dowChart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- インストア導線 -->
+    <section class="panel" id="panel-journey" data-panel="journey">
+      <h2>インストア導線 — 来店から購買まで</h2>
+      <p class="desc">AIカメラ計測の各ステップとID-POS購買を突合したファネル分析</p>
+      <div class="stats" id="funnelStats"></div>
+      <div class="card">
+        <div class="card-title">ファネル転換率（キャンペーン全体）</div>
+        <div class="chart-wrap sm" id="funnelChart"></div>
+        <p class="caption">各ステップ間の転換率 / AIカメラ + ID-POS突合</p>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3>メディア接触有無 × 購買転換</h3>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead><tr><th>セグメント</th><th class="num">来店者数</th><th class="num">購買数</th><th class="num">転換率</th><th class="num">平均単価</th><th class="num">前週比</th></tr></thead>
+              <tbody id="segmentTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>週次 — ファネル各段階の推移</h3>
+          <div class="chart-wrap" id="funnelTrend"></div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <h3>導線パターン別 — 平均ステップ数と購買率</h3>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>導線パターン</th><th class="num">セッション数</th><th class="num">平均ステップ</th><th class="num">購買率</th><th class="num">平均滞在</th><th>備考</th></tr></thead>
+          <tbody id="patternTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 効果検証 -->
+    <section class="panel" id="panel-attribution" data-panel="attribution">
+      <h2>効果検証 — 売上リフトとROAS</h2>
+      <p class="desc">リテールメディア配信 + AIカメラ視認を説明変数とした販売リフト推定</p>
+      <div class="stats" id="attrStats"></div>
+      <div class="grid-2">
+        <div>
+          <h3>週次 — 実売上 vs ベースライン</h3>
+          <div class="chart-wrap" id="salesLiftChart"></div>
+          <p class="caption">横軸: 週 / 縦軸: 売上（百万円） / ベースライン=対照店舗加重平均</p>
+        </div>
+        <div>
+          <h3>リフト寄与 — メディアタイプ別</h3>
+          <div class="chart-wrap" id="liftContribChart"></div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <h3>AIカメラ指標 × 販売リフト相関</h3>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+        <table>
+          <thead><tr><th>カメラ指標</th><th class="num">相関係数</th><th>リフト寄与</th><th>信頼区間</th><th>解釈</th></tr></thead>
+          <tbody id="corrTable"></tbody>
+        </table>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3>対照群 vs 施策群 — SKU別販売比較</h3>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead><tr><th>SKU</th><th class="num">施策群売上</th><th class="num">対照群売上</th><th class="num">リフト</th><th class="num">視認率</th></tr></thead>
+              <tbody id="skuLiftTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>投資対効果サマリー</h3>
+          <div class="card" id="roiSummary"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 店舗別 -->
+    <section class="panel" id="panel-store" data-panel="store">
+      <h2>店舗別 — パフォーマンス比較</h2>
+      <div class="grid-2">
+        <div>
+          <h3>エリア別 — 視認率とROAS</h3>
+          <div class="chart-wrap" id="areaChart"></div>
+        </div>
+        <div>
+          <h3>店舗タイプ別 — カメラカバレッジと転換</h3>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead><tr><th>店舗タイプ</th><th class="num">店舗数</th><th class="num">カメラ設置</th><th class="num">視認率</th><th class="num">購買転換</th></tr></thead>
+              <tbody id="storeTypeTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <h3>店舗ランキング — 視認率 × 販売リフト（上位10店）</h3>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+        <table>
+          <thead><tr><th class="num">順位</th><th>店舗</th><th>エリア</th><th class="num">視認率</th><th class="num">滞在</th><th class="num">販売リフト</th><th class="num">ROAS</th><th class="num">カメラ</th></tr></thead>
+          <tbody id="storeRankTable"></tbody>
+        </table>
+      </div>
+      <h3>要改善店舗 — 視認率低下アラート</h3>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>店舗</th><th>エリア</th><th class="num">視認率</th><th class="num">前週比</th><th class="num">カメラ稼働</th><th>推奨アクション</th></tr></thead>
+          <tbody id="alertTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      Retail Media Dashboard · サンプルデータ /
+      <a href="index.html">ID-POSダッシュボード</a> ·
+      <a href="https://github.com/eto-chamm/id-pos-dashboard-mockup">GitHub</a>
+    </footer>
+  </div>
+
+  <script>
+    const FACTOR = { all: 1, kanto: 0.42, kansai: 0.34, chubu: 0.28 };
+    const ZONE_F = { all: 1, entrance: 0.6, beverage: 1.1, endcap: 1.25, checkout: 0.5 };
+
+    function fmt(n) { return Math.round(n).toLocaleString("ja-JP"); }
+    function pct(v) { return `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`; }
+    function factor() {
+      const s = document.getElementById("store").value;
+      const z = document.getElementById("zone").value;
+      return (FACTOR[s] || 1) * (ZONE_F[z] || 1);
+    }
+
+    function renderBarChart(el, categories, series, opts = {}) {
+      const { horizontal, suffix = "", h = 160 } = opts;
+      const w = 400, padL = 44, padR = 12, padT = 12, padB = 28;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+
+      if (horizontal) {
+        const max = Math.max(...series[0].data) * 1.1;
+        const barH = chartH / categories.length * 0.6;
+        const gap = chartH / categories.length;
+        let bars = "", labels = "";
+        categories.forEach((cat, i) => {
+          const v = series[0].data[i];
+          const bw = (v / max) * chartW;
+          const y = padT + i * gap + (gap - barH) / 2;
+          bars += `<rect x="${padL}" y="${y}" width="${bw}" height="${barH}" fill="var(--accent)" rx="2"/>`;
+          labels += `<text x="${padL - 4}" y="${y + barH / 2 + 4}" fill="var(--muted)" font-size="9" text-anchor="end">${cat}</text>`;
+          bars += `<text x="${padL + bw + 4}" y="${y + barH / 2 + 4}" fill="var(--text)" font-size="9">${v}${suffix}</text>`;
+        });
+        el.innerHTML = `<svg viewBox="0 0 ${w} ${h}">${labels}${bars}</svg>`;
+        return;
+      }
+
+      const allVals = series.flatMap(s => s.data);
+      const max = Math.max(...allVals) * 1.1;
+      const groupW = chartW / categories.length;
+      const barW = groupW / (series.length + 1);
+      const colors = ["var(--accent)", "var(--success)"];
+      let bars = "", xLabels = "";
+      categories.forEach((cat, i) => {
+        series.forEach((s, si) => {
+          const v = s.data[i];
+          const bh = (v / max) * chartH;
+          const x = padL + i * groupW + si * barW + barW * 0.2;
+          const y = padT + chartH - bh;
+          bars += `<rect x="${x}" y="${y}" width="${barW * 0.8}" height="${bh}" fill="${colors[si]}" rx="2"/>`;
+        });
+        xLabels += `<text x="${padL + i * groupW + groupW / 2}" y="${h - 6}" fill="var(--muted)" font-size="8" text-anchor="middle">${cat}</text>`;
+      });
+      el.innerHTML = `<svg viewBox="0 0 ${w} ${h}">${bars}${xLabels}
+        <text x="4" y="${padT + 4}" fill="var(--muted)" font-size="9">${Math.round(max)}${suffix}</text></svg>`;
+    }
+
+    function renderLineChart(el, labels, series, opts = {}) {
+      const { h = 160, suffix = "" } = opts;
+      const w = 400, padL = 44, padR = 12, padT = 12, padB = 28;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+      const all = series.flatMap(s => s.data);
+      const min = Math.min(...all) * 0.9;
+      const max = Math.max(...all) * 1.05;
+      const range = max - min || 1;
+      const colors = ["var(--accent)", "var(--success)"];
+      let lines = "";
+      series.forEach((s, si) => {
+        const pts = s.data.map((v, i) => {
+          const x = padL + (i / Math.max(s.data.length - 1, 1)) * chartW;
+          const y = padT + chartH - ((v - min) / range) * chartH;
+          return `${x},${y}`;
+        }).join(" ");
+        lines += `<polyline points="${pts}" fill="none" stroke="${colors[si]}" stroke-width="2"/>`;
+      });
+      const xLabels = labels.map((lb, i) => {
+        const x = padL + (i / Math.max(labels.length - 1, 1)) * chartW;
+        return `<text x="${x}" y="${h - 6}" fill="var(--muted)" font-size="9" text-anchor="middle">${lb}</text>`;
+      }).join("");
+      el.innerHTML = `<svg viewBox="0 0 ${w} ${h}">${lines}${xLabels}</svg>`;
+    }
+
+    function renderPie(el, data) {
+      const size = 140, cx = 70, cy = 70, r = 50;
+      const total = data.reduce((a, d) => a + d.value, 0);
+      const colors = ["var(--accent)", "var(--success)", "#7b8fc4", "#6a8a7a"];
+      let start = -Math.PI / 2;
+      let slices = "";
+      data.forEach((d, i) => {
+        const angle = (d.value / total) * Math.PI * 2;
+        const x1 = cx + r * Math.cos(start);
+        const y1 = cy + r * Math.sin(start);
+        const x2 = cx + r * Math.cos(start + angle);
+        const y2 = cy + r * Math.sin(start + angle);
+        const large = angle > Math.PI ? 1 : 0;
+        slices += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} Z" fill="${colors[i]}"/>`;
+        start += angle;
+      });
+      let legend = data.map((d, i) =>
+        `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:11px;color:var(--muted)">
+          <span style="width:8px;height:8px;background:${colors[i]};border-radius:2px"></span>${d.label} ${d.value}%</span>`
+      ).join("");
+      el.innerHTML = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${slices}</svg>
+        <div style="margin-top:8px">${legend}</div>`;
+    }
+
+    function render() {
+      const f = factor();
+
+      document.getElementById("overviewStats").innerHTML = `
+        <div class="stat"><div class="val">${fmt(4820000 * f)}</div><div class="lbl">メディアインプレッション</div></div>
+        <div class="stat"><div class="val">${fmt(1240000 * f)}</div><div class="lbl">AIカメラ 来店者通過数</div></div>
+        <div class="stat info"><div class="val">18.6%</div><div class="lbl">広告視認率（推定）</div></div>
+        <div class="stat"><div class="val">12.4秒</div><div class="lbl">平均棚前滞在時間</div></div>
+        <div class="stat success"><div class="val">3.8%</div><div class="lbl">棚前→購買転換率</div></div>
+        <div class="stat success"><div class="val">¥4.2</div><div class="lbl">ROAS（広告費対売上）</div></div>`;
+
+      renderLineChart(document.getElementById("overviewTrend"),
+        ["W14","W15","W16","W17","W18","W19","W20"],
+        [{ data: [620,680,710,740,780,820,850].map(v => v * f) },
+         { data: [18,21,22,24,26,28,30].map(v => v * f) }]);
+
+      renderPie(document.getElementById("channelPie"), [
+        { label: "デジタルサイネージ", value: 38 },
+        { label: "エンドキャップ", value: 28 },
+        { label: "棚帯・POP", value: 22 },
+        { label: "レジ横", value: 12 },
+      ]);
+
+      document.getElementById("sourceTable").innerHTML = `
+        <tr class="success"><td>リテールメディア配信ログ</td><td>リテーラー RM基盤</td><td>リアルタイム</td><td class="num">248店 / 100%</td><td class="num">5分前</td></tr>
+        <tr class="success"><td>AIカメラ（来店・視線・滞在）</td><td>リテーラー → メーカー提供</td><td>15分間隔</td><td class="num">${fmt(186 * f)}カメラ</td><td class="num">12分前</td></tr>
+        <tr class="success"><td>ID-POS（匿名化）</td><td>リテーラー DMP</td><td>日次</td><td class="num">248店 / 100%</td><td class="num">2026/05/20</td></tr>
+        <tr class="success"><td>店舗マスタ・ゾーン定義</td><td>リテーラー</td><td>週次</td><td class="num">248店</td><td class="num">2026/05/18</td></tr>`;
+
+      document.getElementById("cameraScope").innerHTML = `
+        <div class="info-box-inner">
+          <div class="info-box-text"><strong>AIカメラ提供スコープ</strong>
+            <p>リテーラーがメーカーに提供する匿名化カメラデータ: 来店者フロー、広告・棚エリアへの視線率、滞在時間、ピックアップ推定。個人特定情報は含まず、ゾーン単位で集計。</p></div>
+          <div class="info-stats">
+            <div class="stat"><div class="val">${fmt(186 * f)}台</div><div class="lbl">稼働カメラ数</div></div>
+            <div class="stat"><div class="val">${fmt(92 * f)}店</div><div class="lbl">カメラ設置店舗</div></div>
+            <div class="stat success"><div class="val">99.2%</div><div class="lbl">稼働率（7日平均）</div></div>
+          </div>
+        </div>`;
+
+      document.getElementById("campaignStats").innerHTML = `
+        <div class="stat"><div class="val">${fmt(4820000 * f)}</div><div class="lbl">総インプレッション</div></div>
+        <div class="stat"><div class="val">¥${(12.4 * f).toFixed(1)}M</div><div class="lbl">広告費</div></div>
+        <div class="stat"><div class="val">¥2.58</div><div class="lbl">CPM</div></div>
+        <div class="stat info"><div class="val">18.6%</div><div class="lbl">推定視認率</div></div>`;
+
+      renderBarChart(document.getElementById("mediaTypeChart"),
+        ["サイネージ","エンドキャップ","棚帯POP","レジ横"],
+        [{ data: [1830,1350,1060,580].map(v => v * f) }, { data: [22.4,31.2,14.8,9.6] }]);
+
+      document.getElementById("creativeTable").innerHTML = `
+        <tr><td>CR-A 15秒動画</td><td>サイネージ</td><td class="num">${fmt(820*f)}</td><td class="num">24.1%</td><td class="num">8.2%</td><td class="num up">+2.4%</td></tr>
+        <tr><td>CR-B 静止画</td><td>エンドキャップ</td><td class="num">${fmt(680*f)}</td><td class="num">33.8%</td><td class="num">11.4%</td><td class="num up">+4.1%</td></tr>
+        <tr><td>CR-C 棚帯</td><td>POP</td><td class="num">${fmt(540*f)}</td><td class="num">15.2%</td><td class="num">6.8%</td><td class="num down">-0.8%</td></tr>
+        <tr><td>CR-D レジ横</td><td>ディスプレイ</td><td class="num">${fmt(320*f)}</td><td class="num">10.4%</td><td class="num">4.1%</td><td class="num up">+1.2%</td></tr>`;
+
+      renderLineChart(document.getElementById("dailyChart"),
+        ["4/1","4/8","4/15","4/22","4/29","5/6","5/13","5/20"],
+        [{ data: [210,225,240,255,268,280,295,310].map(v => v * f) },
+         { data: [42,48,52,58,62,68,72,78].map(v => v * f) }]);
+
+      document.getElementById("cameraStats").innerHTML = `
+        <div class="stat"><div class="val">${fmt(1240000*f)}</div><div class="lbl">ゾーン通過数</div></div>
+        <div class="stat"><div class="val">${fmt(342000*f)}</div><div class="lbl">視線検知セッション</div></div>
+        <div class="stat info"><div class="val">18.6%</div><div class="lbl">広告エリア視認率</div></div>
+        <div class="stat"><div class="val">12.4秒</div><div class="lbl">平均棚前滞在</div></div>
+        <div class="stat success"><div class="val">8.2%</div><div class="lbl">ピックアップ推定率</div></div>`;
+
+      renderBarChart(document.getElementById("zoneChart"),
+        ["入口","飲料売場","エンドキャップ","冷蔵ケース","レジ前"],
+        [{ data: [420,380,210,165,290].map(v => v * f) }, { data: [8.2,24.6,31.2,19.8,6.4] }]);
+
+      renderLineChart(document.getElementById("hourChart"),
+        ["9時","11時","13時","15時","17時","19時","21時"],
+        [{ data: [42,68,85,72,95,100,58] }, { data: [14,18,22,20,24,26,16] }]);
+
+      document.getElementById("zoneDetailTable").innerHTML = `
+        <tr><td>飲料売場（メイン）</td><td class="num">48</td><td class="num">${fmt(380420*f)}</td><td class="num">24.6%</td><td class="num">14.2秒</td><td class="num">9.1%</td><td class="num up">+1.8%</td></tr>
+        <tr><td>エンドキャップ A-01</td><td class="num">24</td><td class="num">${fmt(210180*f)}</td><td class="num">31.2%</td><td class="num">18.6秒</td><td class="num">12.4%</td><td class="num up">+3.2%</td></tr>
+        <tr><td>入口サイネージ</td><td class="num">32</td><td class="num">${fmt(420600*f)}</td><td class="num">8.2%</td><td class="num">4.8秒</td><td class="num">—</td><td class="num up">+0.4%</td></tr>
+        <tr><td>冷蔵ケース前</td><td class="num">36</td><td class="num">${fmt(165240*f)}</td><td class="num">19.8%</td><td class="num">11.0秒</td><td class="num">7.6%</td><td class="num down">-0.6%</td></tr>
+        <tr><td>レジ前ディスプレイ</td><td class="num">18</td><td class="num">${fmt(290100*f)}</td><td class="num">6.4%</td><td class="num">3.2秒</td><td class="num">—</td><td class="num up">+0.9%</td></tr>`;
+
+      renderPie(document.getElementById("genderPie"), [
+        { label: "女性", value: 54 }, { label: "男性", value: 41 }, { label: "不明", value: 5 },
+      ]);
+      renderBarChart(document.getElementById("ageChart"),
+        ["20代","30代","40代","50代","60代+"],
+        [{ data: [22,28,24,16,10] }], { suffix: "%", h: 120 });
+      renderBarChart(document.getElementById("dowChart"),
+        ["月","火","水","木","金","土","日"],
+        [{ data: [16,17,18,19,21,24,22] }, { data: [10,11,11,12,13,15,14] }], { h: 160 });
+
+      document.getElementById("funnelStats").innerHTML = `
+        <div class="stat"><div class="val">${fmt(1240000*f)}</div><div class="lbl">① 売場通過</div></div>
+        <div class="stat info"><div class="val">${fmt(342000*f)}</div><div class="lbl">② 広告視認</div></div>
+        <div class="stat"><div class="val">${fmt(186000*f)}</div><div class="lbl">③ 棚接近</div></div>
+        <div class="stat"><div class="val">${fmt(102000*f)}</div><div class="lbl">④ ピックアップ推定</div></div>
+        <div class="stat success"><div class="val">${fmt(47200*f)}</div><div class="lbl">⑤ ID-POS購買</div></div>`;
+
+      renderBarChart(document.getElementById("funnelChart"),
+        ["通過→視認","視認→接近","接近→ピック","ピック→購買","通過→購買"],
+        [{ data: [27.6,54.4,54.8,46.3,3.8] }], { horizontal: true, suffix: "%", h: 160 });
+
+      document.getElementById("segmentTable").innerHTML = `
+        <tr class="success"><td>広告視認あり</td><td class="num">${fmt(342000*f)}</td><td class="num">${fmt(38400*f)}</td><td class="num">11.2%</td><td class="num">¥428</td><td class="num up">+1.4%</td></tr>
+        <tr><td>広告視認なし（対照）</td><td class="num">${fmt(898000*f)}</td><td class="num">${fmt(8800*f)}</td><td class="num">0.98%</td><td class="num">¥312</td><td class="num up">+0.1%</td></tr>
+        <tr><td>エンドキャップ視認</td><td class="num">${fmt(186000*f)}</td><td class="num">${fmt(24200*f)}</td><td class="num">13.0%</td><td class="num">¥456</td><td class="num up">+2.1%</td></tr>
+        <tr><td>サイネージのみ視認</td><td class="num">${fmt(156000*f)}</td><td class="num">${fmt(14200*f)}</td><td class="num">9.1%</td><td class="num">¥398</td><td class="num up">+0.8%</td></tr>`;
+
+      renderLineChart(document.getElementById("funnelTrend"),
+        ["W14","W15","W16","W17","W18","W19","W20"],
+        [{ data: [16.2,17.1,17.8,18.2,18.6,19.1,19.4] }, { data: [3.2,3.4,3.5,3.6,3.7,3.8,3.9] }]);
+
+      document.getElementById("patternTable").innerHTML = `
+        <tr><td>入口→サイネージ→棚→購買</td><td class="num">${fmt(28400*f)}</td><td class="num">4.2</td><td class="num">14.8%</td><td class="num">6分12秒</td><td>最も高転換</td></tr>
+        <tr><td>直接棚接近→購買</td><td class="num">${fmt(62100*f)}</td><td class="num">2.1</td><td class="num">8.4%</td><td class="num">2分48秒</td><td>目的買い</td></tr>
+        <tr><td>エンドキャップ経由→購買</td><td class="num">${fmt(18600*f)}</td><td class="num">3.6</td><td class="num">16.2%</td><td class="num">5分04秒</td><td>CR-B効果</td></tr>
+        <tr><td>通過のみ（非購買）</td><td class="num">${fmt(1130000*f)}</td><td class="num">1.0</td><td class="num">—</td><td class="num">48秒</td><td>離脱</td></tr>`;
+
+      document.getElementById("attrStats").innerHTML = `
+        <div class="stat success"><div class="val">+18.4%</div><div class="lbl">販売リフト（対照比）</div></div>
+        <div class="stat success"><div class="val">¥${(52.1*f).toFixed(1)}M</div><div class="lbl">増分売上（推定）</div></div>
+        <div class="stat success"><div class="val">4.2x</div><div class="lbl">ROAS</div></div>
+        <div class="stat"><div class="val">¥264</div><div class="lbl">増分売上/視認セッション</div></div>`;
+
+      renderLineChart(document.getElementById("salesLiftChart"),
+        ["W14","W15","W16","W17","W18","W19","W20"],
+        [{ data: [6.2,6.8,7.1,7.4,7.8,8.1,8.4].map(v => v * f) },
+         { data: [5.4,5.6,5.8,6.0,6.2,6.4,6.6].map(v => v * f) }]);
+
+      renderBarChart(document.getElementById("liftContribChart"),
+        ["エンドキャップ","サイネージ","棚帯POP","レジ横","カメラ視認"],
+        [{ data: [7.2,4.8,2.4,1.2,2.8] }], { horizontal: true, suffix: "pt", h: 180 });
+
+      document.getElementById("corrTable").innerHTML = `
+        <tr><td>広告視認率</td><td class="num">0.72</td><td>高</td><td>±3.2%</td><td>視認率↑ → 購買転換↑</td></tr>
+        <tr><td>棚前滞在時間</td><td class="num">0.68</td><td>高</td><td>±2.8%</td><td>12秒以上で転換急増</td></tr>
+        <tr class="success"><td>ピックアップ推定率</td><td class="num">0.81</td><td>最高</td><td>±2.1%</td><td>最強の先行指標</td></tr>
+        <tr><td>来店者フロー</td><td class="num">0.34</td><td>低</td><td>±5.4%</td><td>需要変動の confound</td></tr>
+        <tr><td>エンドキャップ視認</td><td class="num">0.76</td><td>高</td><td>±2.6%</td><td>CR-Bが牽引</td></tr>`;
+
+      document.getElementById("skuLiftTable").innerHTML = `
+        <tr><td>SKU-001 新炭酸水</td><td class="num">¥18.2M</td><td class="num">¥14.8M</td><td class="num up">+23.0%</td><td class="num">28.4%</td></tr>
+        <tr><td>SKU-042 機能性緑茶</td><td class="num">¥12.4M</td><td class="num">¥11.2M</td><td class="num up">+10.7%</td><td class="num">22.1%</td></tr>
+        <tr><td>SKU-205 スポーツ</td><td class="num">¥8.6M</td><td class="num">¥7.1M</td><td class="num up">+21.1%</td><td class="num">31.2%</td></tr>
+        <tr><td>SKU-118 麦茶2L</td><td class="num">¥6.2M</td><td class="num">¥5.8M</td><td class="num up">+6.9%</td><td class="num">18.6%</td></tr>`;
+
+      document.getElementById("roiSummary").innerHTML = `
+        <div class="kpi-row"><span>メディア広告費</span><span>¥12.4M</span></div>
+        <div class="kpi-row"><span>AIカメラデータ提供費</span><span>¥1.8M</span></div>
+        <div class="kpi-row"><span>分析・運用費</span><span>¥0.6M</span></div>
+        <div class="kpi-row total"><span>総投資</span><span>¥14.8M</span></div>
+        <div class="kpi-row"><span>増分売上（推定）</span><span class="up">¥52.1M</span></div>
+        <div class="kpi-row total"><span>ROAS</span><span class="up">4.2x</span></div>`;
+
+      renderBarChart(document.getElementById("areaChart"),
+        ["関東","関西","中部","九州","その他"],
+        [{ data: [19.8,18.2,17.4,16.8,15.2] }, { data: [4.6,4.1,3.8,3.5,3.2] }]);
+
+      document.getElementById("storeTypeTable").innerHTML = `
+        <tr><td>フラッグシップ</td><td class="num">12</td><td class="num">100%</td><td class="num">24.2%</td><td class="num">5.2%</td></tr>
+        <tr><td>大型SC</td><td class="num">48</td><td class="num">92%</td><td class="num">20.1%</td><td class="num">4.1%</td></tr>
+        <tr><td>標準店</td><td class="num">142</td><td class="num">78%</td><td class="num">17.8%</td><td class="num">3.6%</td></tr>
+        <tr><td>小型店</td><td class="num">46</td><td class="num">42%</td><td class="num">14.2%</td><td class="num">2.8%</td></tr>`;
+
+      document.getElementById("storeRankTable").innerHTML = `
+        <tr class="success"><td class="num">1</td><td>渋谷駅前店</td><td>関東</td><td class="num">32.4%</td><td class="num">16.8秒</td><td class="num up">+28.4%</td><td class="num">5.8x</td><td class="num">6台</td></tr>
+        <tr class="success"><td class="num">2</td><td>梅田本店</td><td>関西</td><td class="num">29.8%</td><td class="num">15.2秒</td><td class="num up">+24.1%</td><td class="num">5.2x</td><td class="num">5台</td></tr>
+        <tr class="success"><td class="num">3</td><td>名古屋栄店</td><td>中部</td><td class="num">28.2%</td><td class="num">14.6秒</td><td class="num up">+22.6%</td><td class="num">4.9x</td><td class="num">4台</td></tr>
+        <tr><td class="num">4</td><td>横浜みなとみらい</td><td>関東</td><td class="num">27.4%</td><td class="num">15.8秒</td><td class="num up">+21.8%</td><td class="num">4.8x</td><td class="num">5台</td></tr>
+        <tr><td class="num">5</td><td>心斎橋店</td><td>関西</td><td class="num">26.6%</td><td class="num">13.4秒</td><td class="num up">+20.2%</td><td class="num">4.6x</td><td class="num">4台</td></tr>
+        <tr><td class="num">6</td><td>池袋東口店</td><td>関東</td><td class="num">25.8%</td><td class="num">14.2秒</td><td class="num up">+19.4%</td><td class="num">4.5x</td><td class="num">4台</td></tr>
+        <tr><td class="num">7</td><td>博多駅店</td><td>九州</td><td class="num">24.2%</td><td class="num">12.8秒</td><td class="num up">+18.6%</td><td class="num">4.2x</td><td class="num">3台</td></tr>
+        <tr><td class="num">8</td><td>千葉中央店</td><td>関東</td><td class="num">23.6%</td><td class="num">13.0秒</td><td class="num up">+17.8%</td><td class="num">4.1x</td><td class="num">3台</td></tr>
+        <tr><td class="num">9</td><td>京都四条店</td><td>関西</td><td class="num">22.8%</td><td class="num">12.4秒</td><td class="num up">+16.4%</td><td class="num">3.9x</td><td class="num">3台</td></tr>
+        <tr><td class="num">10</td><td>さいたま大宮店</td><td>関東</td><td class="num">22.2%</td><td class="num">13.6秒</td><td class="num up">+15.8%</td><td class="num">3.8x</td><td class="num">4台</td></tr>`;
+
+      document.getElementById("alertTable").innerHTML = `
+        <tr class="warn"><td>柏店</td><td>関東</td><td class="num">11.2%</td><td class="num down">-4.2%</td><td class="num">2/3台</td><td>サイネージ角度調整</td></tr>
+        <tr class="warn"><td>堺店</td><td>関西</td><td class="num">10.8%</td><td class="num down">-3.8%</td><td class="num">1/2台</td><td>カメラ再キャリブレーション</td></tr>
+        <tr class="warn"><td>岡山店</td><td>中国</td><td class="num">12.4%</td><td class="num down">-2.6%</td><td class="num">3/3台</td><td>CR-Bクリエイティブ差替</td></tr>`;
+    }
+
+    document.querySelectorAll("#mainTabs .tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#mainTabs .tab").forEach(t => t.classList.toggle("active", t === btn));
+        document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.dataset.panel === btn.dataset.tab));
+      });
+    });
+
+    ["campaign","store","zone"].forEach(id => {
+      document.getElementById(id).addEventListener("change", render);
+    });
+    document.getElementById("btnApply").addEventListener("click", render);
+
+    render();
+  </script>
+</body>
+</html>
